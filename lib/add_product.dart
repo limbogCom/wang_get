@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:async/async.dart';
+//import 'package:async/async.dart';
 import 'package:path/path.dart' as path;
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:flutter/services.dart';
@@ -10,10 +10,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
 
+//import 'package:intl/intl.dart';
+
 import 'package:wang_get/product_scan_model.dart';
 import 'package:wang_get/image_detail.dart';
 import 'package:wang_get/home.dart';
 
+import 'package:soundpool/soundpool.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 
@@ -32,6 +35,11 @@ class _AddProductPageState extends State<AddProductPage> {
   List unitsID = [];
   String _currentUnit;
   var _currentUnitID;
+
+  DateTime _dateTime = DateTime.now();
+
+  Future<int> _soundId;
+  Soundpool _soundpool = Soundpool();
 
   List<int> imageBytes1;
   List<int> imageBytes2;
@@ -60,6 +68,9 @@ class _AddProductPageState extends State<AddProductPage> {
   TextEditingController typeUnit = TextEditingController();
   TextEditingController receiveDetail = TextEditingController();
   TextEditingController receiveLot = TextEditingController();
+
+  TextEditingController receiveDateEXP = TextEditingController();
+  TextEditingController receiveDateMFG = TextEditingController();
 
   _getUiitProduct() async{
     final res = await http.get('https://wangpharma.com/API/receiveProduct.php?act=$act');
@@ -152,9 +163,55 @@ class _AddProductPageState extends State<AddProductPage> {
     //setState(() {});
   }
 
+  Future<int> _loadSound() async {
+    var asset = await rootBundle.load("assets/sounds/beep.mp3");
+    return await _soundpool.load(asset);
+  }
+
+  Future<void> _playSound() async {
+    var _alarmSound = await _soundId;
+    await _soundpool.play(_alarmSound);
+  }
+
+  showToastVal(textVal){
+    Fluttertoast.showToast(
+        msg: textVal,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 3
+    );
+  }
+
+  /*scanBarcode() async {
+    try {
+      var barcode = await BarcodeScanner.scan();
+      _playSound();
+      print('ttttttttttttttt${barcode.rawContent}');
+      setState((){
+        if(barcode.rawContent.isNotEmpty){
+          searchProduct(barcode.rawContent);
+        }else{
+          showToastVal('ไม่พบสินค้า');
+        }
+      });
+    } on PlatformException catch (e) {
+      if (e.code == BarcodeScanner.cameraAccessDenied) {
+        _showAlertBarcode();
+        print('Camera permission was denied');
+      } else {
+        print('Unknow Error $e');
+      }
+    } on FormatException {
+      print('User returned using the "back"-button before scanning anything.');
+    } catch (e) {
+      print('Unknown error.');
+    }
+  }*/
+
   scanBarcode() async {
     try {
       String barcode = await BarcodeScanner.scan();
+      _playSound();
       setState((){
         this.barcode = barcode;
         searchProduct(this.barcode);
@@ -184,6 +241,32 @@ class _AddProductPageState extends State<AddProductPage> {
         );
       },
     );
+  }
+
+  _selectDateProduct(BuildContext context, exp) async{
+    var _pickedDate = await showDatePicker(
+        context: context,
+        initialDate: _dateTime,
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2100));
+
+    if(_pickedDate != null){
+      if(exp == 0){
+        setState(() {
+          _dateTime = _pickedDate;
+
+          print(_dateTime.toString().substring(0,10));
+          receiveDateMFG.text = _dateTime.toString().substring(0,10);
+        });
+      }else{
+        setState(() {
+          _dateTime = _pickedDate;
+
+          print(_dateTime.toString().substring(0,10));
+          receiveDateEXP.text = _dateTime.toString().substring(0,10);
+        });
+      }
+    }
   }
 
   searchProduct(searchVal) async{
@@ -385,6 +468,9 @@ class _AddProductPageState extends State<AddProductPage> {
       request.fields['unit2Val'] = _currentUnit;
       request.fields['lot'] = receiveLot.text;
 
+      request.fields['dateMFG'] = receiveDateMFG.text;
+      request.fields['dateEXP'] = receiveDateEXP.text;
+
       print(request.fields['runFile2']);
       /*print(request.files[0].filename);
       print(request.files[0].length);
@@ -463,6 +549,8 @@ class _AddProductPageState extends State<AddProductPage> {
   void initState(){
     super.initState();
     //_getUiitProduct();
+
+    _soundId = _loadSound();
   }
 
   @override
@@ -574,7 +662,7 @@ class _AddProductPageState extends State<AddProductPage> {
                 Expanded(
                     flex: 2,
                     child: Container(
-                      padding: EdgeInsets.fromLTRB(5, 0, 10, 0),
+                      padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
                       child: DropdownButton(
                         hint: Text("หน่วยสินค้า",style: TextStyle(fontSize: 16)),
                         items: units.map((dropDownStringItem){
@@ -634,6 +722,62 @@ class _AddProductPageState extends State<AddProductPage> {
                       ),
                       decoration: InputDecoration (
                           labelText: 'Lot สินค้า',
+                          labelStyle: TextStyle (
+                            fontSize: (15),
+                          )
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
+            ),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                    child: TextFormField (
+                      onTap: (){
+                        _selectDateProduct(context,0);
+                      },
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                      textAlign: TextAlign.start,
+                      controller: receiveDateMFG,
+                      style: TextStyle (
+                        fontSize: 18,
+                        color: Colors.black,
+                      ),
+                      decoration: InputDecoration (
+                          labelText: 'วันผลิต',
+                          labelStyle: TextStyle (
+                            fontSize: (15),
+                          )
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                    child: TextFormField (
+                      onTap: (){
+                        _selectDateProduct(context,1);
+                      },
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.start,
+                      controller: receiveDateEXP,
+                      style: TextStyle (
+                        fontSize: 18,
+                        color: Colors.black,
+                      ),
+                      decoration: InputDecoration (
+                          labelText: 'วันหมดอายุ',
                           labelStyle: TextStyle (
                             fontSize: (15),
                           )
