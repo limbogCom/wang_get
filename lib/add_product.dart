@@ -44,6 +44,7 @@ class _AddProductPageState extends State<AddProductPage> {
   List<int> imageBytes1;
   List<int> imageBytes2;
   List<int> imageBytes3;
+  List<int> imageBytes4;
 
   List<int> responseBody = [];
 
@@ -52,6 +53,7 @@ class _AddProductPageState extends State<AddProductPage> {
   File imageFile1;
   File imageFile2;
   File imageFile3;
+  File imageFile4;
 
   var empCodeReceive;
 
@@ -110,8 +112,10 @@ class _AddProductPageState extends State<AddProductPage> {
           imageFile1 = picture;
         }else if(camPosition == 2){
           imageFile2 = picture;
-        }else{
+        }else if(camPosition == 3){
           imageFile3 = picture;
+        }else{
+          imageFile4 = picture;
         }
       });
       //Navigator.of(context).pop();
@@ -125,13 +129,15 @@ class _AddProductPageState extends State<AddProductPage> {
       imageFileC = imageFile1;
     }else if(camPosition == 2){
       imageFileC = imageFile2;
-    }else{
+    }else if(camPosition == 3){
       imageFileC = imageFile3;
+    }else{
+      imageFileC = imageFile4;
     }
 
     if(imageFileC == null){
       return Image (
-        image: AssetImage ( "assets/photo_default_2.png" ), width: 100, height: 100,
+        image: AssetImage ( "assets/photo_default_2.png" ), width: 90, height: 90,
       );
     }else{
       return GestureDetector(
@@ -386,6 +392,7 @@ class _AddProductPageState extends State<AddProductPage> {
     if(imageFile1 != null
         && imageFile2 != null
         && imageFile3 != null
+        && imageFile4 != null
         && _product != []
         && boxAmount.text != null
         && unitAmount.text != null
@@ -448,13 +455,16 @@ class _AddProductPageState extends State<AddProductPage> {
           "runFile2priceTag", stream3, imgLength3,
           filename: path.basename("resizeImageFile3.jpg"));*/
 
+      imageBytes4 = imageFile4.readAsBytesSync();
+      String image4B64 = base64Encode(imageBytes4);
+
       //request.files.add(multipartFile1);
       //request.files.add(multipartFile2);
       //request.files.add(multipartFile3);
       request.fields['runFile2'] = image1B64;
       request.fields['runFile2ex'] = image2B64;
       request.fields['runFile2priceTag'] = image3B64;
-
+      request.fields['runFile2box'] = image4B64;
 
 
       request.fields['runDetail2'] = receiveDetail.text;
@@ -616,6 +626,21 @@ class _AddProductPageState extends State<AddProductPage> {
             Row(
               children: <Widget>[
                 Expanded(
+                    child: Container(
+                      color: Colors.lightBlue,
+                      padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                      child: Text('รายละเอียดสินค้า', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white), textAlign: TextAlign.center,),
+                    )
+                )
+              ],
+            ),
+            _getProductInfo(),
+            Divider(
+              color: Colors.black,
+            ),
+            Row(
+              children: <Widget>[
+                Expanded(
                   flex: 2,
                   child: Container(
                     padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
@@ -731,9 +756,6 @@ class _AddProductPageState extends State<AddProductPage> {
                 ),
               ],
             ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
-            ),
             Row(
               children: <Widget>[
                 Expanded(
@@ -796,11 +818,11 @@ class _AddProductPageState extends State<AddProductPage> {
                   flex: 2,
                   child: Column(
                     children: <Widget>[
-                      Text("รูปวันหมดอายุ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text("รูปวันหมดอายุ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                       _decideImageView(1),
                       IconButton(
                           padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                          icon: Icon(Icons.camera_alt, size: 50,),
+                          icon: Icon(Icons.camera_alt, size: 40,),
                           onPressed: (){
                             _openCamera(1);
                             //Navigator.push(context, MaterialPageRoute(builder: (context) => OrderPage()));
@@ -813,11 +835,11 @@ class _AddProductPageState extends State<AddProductPage> {
                   flex: 2,
                   child: Column(
                     children: <Widget>[
-                      Text("รูปราคาป้าย", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text("รูปราคาป้าย", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                       _decideImageView(2),
                       IconButton(
                           padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                          icon: Icon(Icons.camera_alt, size: 50,),
+                          icon: Icon(Icons.camera_alt, size: 40,),
                           onPressed: (){
                             _openCamera(2);
                             //Navigator.push(context, MaterialPageRoute(builder: (context) => OrderPage()));
@@ -830,11 +852,11 @@ class _AddProductPageState extends State<AddProductPage> {
                   flex: 2,
                   child: Column(
                     children: <Widget>[
-                      Text("รูป LOT สินค้า", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      Text("รูป LOT สินค้า", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                       _decideImageView(3),
                       IconButton(
                           padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
-                          icon: Icon(Icons.camera_alt, size: 50,),
+                          icon: Icon(Icons.camera_alt, size: 40,),
                           onPressed: (){
                             _openCamera(3);
                             //Navigator.push(context, MaterialPageRoute(builder: (context) => OrderPage()));
@@ -843,20 +865,25 @@ class _AddProductPageState extends State<AddProductPage> {
                     ],
                   ),
                 ),
-              ],
-            ),
-            Row(
-              children: <Widget>[
                 Expanded(
-                  child: Container(
-                    color: Colors.lightBlue,
-                    padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                    child: Text('รายละเอียดสินค้า', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white), textAlign: TextAlign.center,),
-                  )
-                )
+                  flex: 2,
+                  child: Column(
+                    children: <Widget>[
+                      Text("รูปลังสินค้า", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      _decideImageView(4),
+                      IconButton(
+                          padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
+                          icon: Icon(Icons.camera_alt, size: 40,),
+                          onPressed: (){
+                            _openCamera(4);
+                            //Navigator.push(context, MaterialPageRoute(builder: (context) => OrderPage()));
+                          }
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
-            _getProductInfo(),
           ],
         ),
       ),
