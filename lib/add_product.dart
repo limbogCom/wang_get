@@ -395,8 +395,23 @@ class _AddProductPageState extends State<AddProductPage> {
 
   _addReceiveProduct() async{
 
-    var tempDateMFG = DateFormat("dd/MM/yyyy").parse(receiveDateMFG.text);
-    var tempDateEXP = DateFormat("dd/MM/yyyy").parse(receiveDateEXP.text);
+    var tempDateMFG;
+    var tempDateEXP;
+
+    if(receiveDateMFG.text == ''){
+      tempDateMFG = '';
+    }else{
+      tempDateMFG = DateFormat("dd/MM/yyyy").parse(receiveDateMFG.text);
+    }
+
+    if(receiveDateEXP.text == ''){
+      tempDateEXP = '';
+    }else{
+      tempDateEXP = DateFormat("dd/MM/yyyy").parse(receiveDateEXP.text);
+    }
+
+    //tempDateMFG = DateFormat("dd/MM/yyyy").parse(receiveDateMFG.text);
+    //521tempDateEXP = DateFormat("dd/MM/yyyy").parse(receiveDateEXP.text);
 
     /*setState(() {
       loadingAdd = true;
@@ -494,8 +509,8 @@ class _AddProductPageState extends State<AddProductPage> {
       //request.fields['dateMFG'] = receiveDateMFG.text;
       //request.fields['dateEXP'] = receiveDateEXP.text;
 
-      request.fields['dateMFG'] = tempDateMFG.toIso8601String();
-      request.fields['dateEXP'] = tempDateEXP.toIso8601String();
+      request.fields['dateMFG'] = tempDateMFG.toString();
+      request.fields['dateEXP'] = tempDateEXP.toString();
 
       print(request.fields['runFile2']);
       /*print(request.files[0].filename);
