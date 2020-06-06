@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
 
-//import 'package:intl/intl.dart';
+import 'package:intl/intl.dart';
 
 import 'package:wang_get/product_scan_model.dart';
 import 'package:wang_get/image_detail.dart';
@@ -18,6 +18,8 @@ import 'package:wang_get/home.dart';
 
 import 'package:soundpool/soundpool.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+
+import 'package:pattern_formatter/pattern_formatter.dart';
 
 
 class AddProductPage extends StatefulWidget {
@@ -382,8 +384,19 @@ class _AddProductPageState extends State<AddProductPage> {
     return resizeImageFile;
   }
 
+  _addReceiveProductTest() async{
+    var tempDateMFG = DateFormat("dd/MM/yyyy").parse(receiveDateMFG.text);
+    var tempDateEXP = DateFormat("dd/MM/yyyy").parse(receiveDateEXP.text);
+    print(tempDateMFG);
+    print(tempDateEXP);
+    //print(receiveDateEXP.text);
+  }
+
 
   _addReceiveProduct() async{
+
+    var tempDateMFG = DateFormat("dd/MM/yyyy").parse(receiveDateMFG.text);
+    var tempDateEXP = DateFormat("dd/MM/yyyy").parse(receiveDateEXP.text);
 
     /*setState(() {
       loadingAdd = true;
@@ -478,8 +491,11 @@ class _AddProductPageState extends State<AddProductPage> {
       request.fields['unit2Val'] = _currentUnit;
       request.fields['lot'] = receiveLot.text;
 
-      request.fields['dateMFG'] = receiveDateMFG.text;
-      request.fields['dateEXP'] = receiveDateEXP.text;
+      //request.fields['dateMFG'] = receiveDateMFG.text;
+      //request.fields['dateEXP'] = receiveDateEXP.text;
+
+      request.fields['dateMFG'] = tempDateMFG.toIso8601String();
+      request.fields['dateEXP'] = tempDateEXP.toIso8601String();
 
       print(request.fields['runFile2']);
       /*print(request.files[0].filename);
@@ -763,11 +779,11 @@ class _AddProductPageState extends State<AddProductPage> {
                   child: Container(
                     padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
                     child: TextFormField (
-                      onTap: (){
+                      /*onTap: (){
                         _selectDateProduct(context,0);
-                      },
+                      },*/
                       maxLines: null,
-                      keyboardType: TextInputType.multiline,
+                      keyboardType: TextInputType.number,
                       textAlign: TextAlign.start,
                       controller: receiveDateMFG,
                       style: TextStyle (
@@ -775,11 +791,16 @@ class _AddProductPageState extends State<AddProductPage> {
                         color: Colors.black,
                       ),
                       decoration: InputDecoration (
+                          hintText: 'dd/MM/yyyy',
                           labelText: 'วันผลิต',
                           labelStyle: TextStyle (
                             fontSize: (15),
                           )
                       ),
+                      inputFormatters: [
+                        WhitelistingTextInputFormatter(RegExp(r'\d+|-|/')),
+                        DateInputFormatter(),
+                      ],
                     ),
                   ),
                 ),
@@ -788,9 +809,9 @@ class _AddProductPageState extends State<AddProductPage> {
                   child: Container(
                     padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                     child: TextFormField (
-                      onTap: (){
+                      /*onTap: (){
                         _selectDateProduct(context,1);
-                      },
+                      },*/
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.start,
                       controller: receiveDateEXP,
@@ -799,11 +820,16 @@ class _AddProductPageState extends State<AddProductPage> {
                         color: Colors.black,
                       ),
                       decoration: InputDecoration (
+                          hintText: 'dd/MM/yyyy',
                           labelText: 'วันหมดอายุ',
                           labelStyle: TextStyle (
                             fontSize: (15),
                           )
                       ),
+                      inputFormatters: [
+                        WhitelistingTextInputFormatter(RegExp(r'\d+|-|/')),
+                        DateInputFormatter(),
+                      ],
                     ),
                   ),
                 ),
